@@ -6,24 +6,37 @@ using Arithmetic.Database;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace Arithmetic;
 
 internal static class Program
 {
+
+
+
+    public static IHost AppHost; // <- исправили название
+
     [STAThread]
     static void Main(string[] args)
     {
-        var host = CreateHostBuilder(args).Build();
+
+
+        AppHost = CreateHostBuilder(args).Build(); // <- исправили тут
 
         ApplicationConfiguration.Initialize();
 
-        using (var scope = host.Services.CreateScope())
+        using (var scope = AppHost.Services.CreateScope()) // <- и тут
         {
+
             var services = scope.ServiceProvider;
             var context = services.GetRequiredService<AppDbContext>();
             try
             {
-                context.Database.EnsureCreated(); // Убедимся, что база доступна
+                if (!context.Database.CanConnect())
+                {
+                    MessageBox.Show($"Ошибка подключения к базе данных: не удалось установить соединение.");
+                    return;
+                }
             }
             catch (Exception ex)
             {
@@ -31,14 +44,15 @@ internal static class Program
                 return;
             }
         }
+
         ApplicationConfiguration.Initialize();
 
-        var loginForm = host.Services.GetRequiredService<LoginForm>();
+        var loginForm = AppHost.Services.GetRequiredService<LoginForm>(); // <- и тут
         Application.Run(loginForm);
     }
 
     static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args)
+        Host.CreateDefaultBuilder(args) // <- тут всё правильно, это класс Host
             .ConfigureAppConfiguration((context, config) =>
             {
                 config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
@@ -50,11 +64,13 @@ internal static class Program
                 services.AddDbContext<AppDbContext>(options =>
                     options.UseSqlServer(connectionString));
 
-                //services.AddScoped<UserSession>();
                 services.AddScoped<LoginForm>();
+                services.AddScoped<LoginForm2>();
                 services.AddScoped<RegistrationForm>();
                 services.AddScoped<MainForm>();
                 services.AddScoped<TeacherForm>();
                 services.AddScoped<AdminForm>();
+                services.AddScoped<Бассейн_п_о>();
             });
+
 }

@@ -17,13 +17,9 @@ namespace Arithmetic.Database
         public DbSet<Result> Results { get; set; }
         public DbSet<TaskResult> TaskResults { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public AppDbContext(DbContextOptions<AppDbContext> options)
+            : base(options)
         {
-            if (!optionsBuilder.IsConfigured)
-            {
-                // Локальное подключение
-                optionsBuilder.UseSqlServer(@"Server=DESKTOP-36VM1D0;Database=ArithmeticTasksDB;Integrated Security=True;");
-            }
         }
     }
 }

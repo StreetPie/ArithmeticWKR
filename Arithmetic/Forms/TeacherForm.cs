@@ -1,13 +1,22 @@
-﻿using System.Windows.Forms;
+﻿using System;
+using System.Windows.Forms;
+using Arithmetic.Models;
 
 namespace Arithmetic.Forms
 {
     public partial class TeacherForm : Form
     {
-        public TeacherForm()
+        private readonly User _user;
+
+        public TeacherForm(User user)
         {
             InitializeComponent();
-            this.WindowState = FormWindowState.Maximized;
+            _user = user;
+        }
+
+        private void TeacherForm_Load(object sender, EventArgs e)
+        {
+            labelWelcome.Text = $"Добро пожаловать, учитель {_user.FirstName}!";
         }
     }
 }

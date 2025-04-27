@@ -31,5 +31,7 @@ namespace Arithmetic.Models
         public int? ClassId { get; set; }
         [ForeignKey("ClassId")]
         public virtual Class Class { get; set; }
+        public string FullName => $"{FirstName} {LastName}";
+
     }
 }
