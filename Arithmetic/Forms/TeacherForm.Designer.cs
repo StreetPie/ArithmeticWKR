@@ -2,52 +2,70 @@
 {
     partial class TeacherForm
     {
-        private System.ComponentModel.IContainer components = null;
-        private Label labelWelcome;
-        private Button buttonTaskConstructor; 
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null)) components.Dispose();
-            base.Dispose(disposing);
-        }
+        private Button buttonTaskConstructor;
+        private Button buttonStudents;
+        private Button buttonProgress;
+        private DataGridView dataGridViewTasks;
 
         private void InitializeComponent()
         {
-            labelWelcome = new Label();
             buttonTaskConstructor = new Button();
+            buttonStudents = new Button();
+            buttonProgress = new Button();
+            dataGridViewTasks = new DataGridView();
+            ((System.ComponentModel.ISupportInitialize)dataGridViewTasks).BeginInit();
             SuspendLayout();
-            // 
-            // labelWelcome
-            // 
-            labelWelcome.Location = new Point(26, 84);
-            labelWelcome.Name = "labelWelcome";
-            labelWelcome.Size = new Size(350, 30);
-            labelWelcome.TabIndex = 1;
-            labelWelcome.Text = "Добро пожаловать, учитель!";
             // 
             // buttonTaskConstructor
             // 
-            buttonTaskConstructor.Location = new Point(26, 22);
-            buttonTaskConstructor.Margin = new Padding(3, 2, 3, 2);
+            buttonTaskConstructor.Font = new Font("Segoe UI", 24F, FontStyle.Bold);
+            buttonTaskConstructor.Location = new Point(50, 30);
             buttonTaskConstructor.Name = "buttonTaskConstructor";
-            buttonTaskConstructor.Size = new Size(163, 51);
+            buttonTaskConstructor.Size = new Size(500, 80);
             buttonTaskConstructor.TabIndex = 0;
             buttonTaskConstructor.Text = "Конструктор задач";
-            buttonTaskConstructor.UseVisualStyleBackColor = true;
             buttonTaskConstructor.Click += buttonTaskConstructor_Click;
+            // 
+            // buttonStudents
+            // 
+            buttonStudents.Font = new Font("Segoe UI", 24F, FontStyle.Bold);
+            buttonStudents.Location = new Point(600, 30);
+            buttonStudents.Name = "buttonStudents";
+            buttonStudents.Size = new Size(500, 80);
+            buttonStudents.TabIndex = 1;
+            buttonStudents.Text = "Список учеников";
+            buttonStudents.Click += buttonStudentsList_Click;
+            // 
+            // buttonProgress
+            // 
+            buttonProgress.Font = new Font("Segoe UI", 24F, FontStyle.Bold);
+            buttonProgress.Location = new Point(1150, 30);
+            buttonProgress.Name = "buttonProgress";
+            buttonProgress.Size = new Size(500, 80);
+            buttonProgress.TabIndex = 2;
+            buttonProgress.Text = "График успеваемости";
+            buttonProgress.Click += buttonProgress_Click;
+            // 
+            // dataGridViewTasks
+            // 
+            dataGridViewTasks.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dataGridViewTasks.Font = new Font("Segoe UI", 16F);
+            dataGridViewTasks.Location = new Point(50, 150);
+            dataGridViewTasks.Name = "dataGridViewTasks";
+            dataGridViewTasks.RowTemplate.Height = 50;
+            dataGridViewTasks.Size = new Size(1800, 671);
+            dataGridViewTasks.TabIndex = 3;
             // 
             // TeacherForm
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(525, 300);
+            ClientSize = new Size(1920, 1061);
             Controls.Add(buttonTaskConstructor);
-            Controls.Add(labelWelcome);
-            Margin = new Padding(3, 2, 3, 2);
+            Controls.Add(buttonStudents);
+            Controls.Add(buttonProgress);
+            Controls.Add(dataGridViewTasks);
             Name = "TeacherForm";
             Text = "Панель учителя";
-            Load += TeacherForm_Load;
+            ((System.ComponentModel.ISupportInitialize)dataGridViewTasks).EndInit();
             ResumeLayout(false);
         }
     }

@@ -51,6 +51,7 @@ internal static class Program
         //Application.Run(loginForm);
         var teacherForm = AppHost.Services.GetRequiredService<TeacherForm>();
         Application.Run(teacherForm);
+        
     }
 
     static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -74,9 +75,9 @@ internal static class Program
                 services.AddScoped<AdminForm>();
                 //services.AddScoped<Ѕассейн_п_о>();
                 services.AddScoped<TaskConstructorForm>();
-                //services.AddScoped
-                //services.AddScoped
-                //services.AddScoped
+                services.AddScoped<ProgressChartForm>();
+                services.AddScoped<StudentsListForm>();
+                services.AddScoped<TestConstructorForm>();
                 //services.AddScoped
                 //services.AddScoped
                 //services.AddScoped

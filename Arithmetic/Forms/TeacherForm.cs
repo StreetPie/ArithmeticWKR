@@ -1,31 +1,55 @@
 ﻿using System;
 using System.Windows.Forms;
-using Arithmetic.Models;
-
+using Arithmetic.Forms; // Подключаем формы
+using Arithmetic.Database;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
 
 namespace Arithmetic.Forms
 {
     public partial class TeacherForm : Form
     {
-        private readonly User _user;
+        private readonly AppDbContext _dbContext;
 
-      //  public TeacherForm(User user)
-            public TeacherForm()
+        public TeacherForm(AppDbContext dbContext)
         {
             InitializeComponent();
-            //_user = user;
+            _dbContext = dbContext;
+
+            LoadTasks(); // загрузить список задач
         }
 
-        private void TeacherForm_Load(object sender, EventArgs e)
+        private void LoadTasks()
         {
+            var tasks = _dbContext.SchoolTasks
+                .Select(t => new
+                {
+                    t.Id,
+                    t.Text,
+                    Difficulty = t.Difficulty == 0 ? "Лёгкая" : (t.Difficulty == 1 ? "Средняя" : "Сложная"),
+                    t.HasAudio
+                })
+                .ToList();
 
+            dataGridViewTasks.DataSource = tasks;
         }
+
         private void buttonTaskConstructor_Click(object sender, EventArgs e)
         {
-            var constructorForm = new TaskConstructorForm();
-            constructorForm.ShowDialog();
+            var form = new TaskConstructorForm();
+            form.ShowDialog();
+        }
+        private void buttonStudentsList_Click(object sender, EventArgs e)
+        {
+            var studentsForm = Program.AppHost.Services.GetRequiredService<StudentsListForm>();
+            studentsForm.ShowDialog();
         }
 
 
+        private void buttonProgress_Click(object sender, EventArgs e)
+        {
+            var studentsForm = Program.AppHost.Services.GetRequiredService<StudentsListForm>();
+            studentsForm.ShowDialog();
+        }
     }
 }

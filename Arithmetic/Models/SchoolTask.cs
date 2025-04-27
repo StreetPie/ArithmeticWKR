@@ -24,7 +24,7 @@ namespace Arithmetic.Models
         [ForeignKey("ParagraphId")]
         public virtual Paragraph Paragraph { get; set; }
 
-        public string HashImage { get; set; }
+        public bool HasImage { get; set; }
 
         public bool HasAudio { get; set; }
 

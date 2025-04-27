@@ -169,8 +169,9 @@ namespace Arithmetic
             }
             else if (user.RoleId == 2)
             {
-                var teacherForm = new TeacherForm(); //TeacherForm(user);
+                var teacherForm = Program.AppHost.Services.GetRequiredService<TeacherForm>();
                 teacherForm.Show();
+
             }
             else if (user.RoleId == 3)
             {
@@ -180,6 +181,7 @@ namespace Arithmetic
 
             this.Hide();
         }
+
 
         private string HashPassword(string password)
         {
