@@ -4,6 +4,7 @@
     {
         private System.ComponentModel.IContainer components = null;
         private Label labelWelcome;
+        private Button buttonTaskConstructor; 
 
         protected override void Dispose(bool disposing)
         {
@@ -13,26 +14,41 @@
 
         private void InitializeComponent()
         {
-            this.labelWelcome = new Label();
-            this.SuspendLayout();
+            labelWelcome = new Label();
+            buttonTaskConstructor = new Button();
+            SuspendLayout();
             // 
             // labelWelcome
             // 
-            this.labelWelcome.Dock = DockStyle.Fill;
-            this.labelWelcome.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
-            this.labelWelcome.TextAlign = ContentAlignment.MiddleCenter;
-            this.labelWelcome.Text = "Добро пожаловать, учитель!";
+            labelWelcome.Location = new Point(26, 84);
+            labelWelcome.Name = "labelWelcome";
+            labelWelcome.Size = new Size(350, 30);
+            labelWelcome.TabIndex = 1;
+            labelWelcome.Text = "Добро пожаловать, учитель!";
+            // 
+            // buttonTaskConstructor
+            // 
+            buttonTaskConstructor.Location = new Point(26, 22);
+            buttonTaskConstructor.Margin = new Padding(3, 2, 3, 2);
+            buttonTaskConstructor.Name = "buttonTaskConstructor";
+            buttonTaskConstructor.Size = new Size(163, 51);
+            buttonTaskConstructor.TabIndex = 0;
+            buttonTaskConstructor.Text = "Конструктор задач";
+            buttonTaskConstructor.UseVisualStyleBackColor = true;
+            buttonTaskConstructor.Click += buttonTaskConstructor_Click;
             // 
             // TeacherForm
             // 
-            this.AutoScaleDimensions = new SizeF(8F, 20F);
-            this.AutoScaleMode = AutoScaleMode.Font;
-            this.ClientSize = new Size(600, 400);
-            this.Controls.Add(this.labelWelcome);
-            this.Name = "TeacherForm";
-            this.Text = "Панель учителя";
-            this.Load += new EventHandler(this.TeacherForm_Load);
-            this.ResumeLayout(false);
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(525, 300);
+            Controls.Add(buttonTaskConstructor);
+            Controls.Add(labelWelcome);
+            Margin = new Padding(3, 2, 3, 2);
+            Name = "TeacherForm";
+            Text = "Панель учителя";
+            Load += TeacherForm_Load;
+            ResumeLayout(false);
         }
     }
 }

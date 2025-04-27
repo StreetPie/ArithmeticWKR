@@ -169,7 +169,7 @@ namespace Arithmetic
             }
             else if (user.RoleId == 2)
             {
-                var teacherForm = new TeacherForm(user);
+                var teacherForm = new TeacherForm(); //TeacherForm(user);
                 teacherForm.Show();
             }
             else if (user.RoleId == 3)

@@ -14,18 +14,18 @@ internal static class Program
 
 
 
-    public static IHost AppHost; // <- исправили название
+    public static IHost AppHost; 
 
     [STAThread]
     static void Main(string[] args)
     {
 
 
-        AppHost = CreateHostBuilder(args).Build(); // <- исправили тут
+        AppHost = CreateHostBuilder(args).Build();
 
         ApplicationConfiguration.Initialize();
 
-        using (var scope = AppHost.Services.CreateScope()) // <- и тут
+        using (var scope = AppHost.Services.CreateScope()) 
         {
 
             var services = scope.ServiceProvider;
@@ -47,12 +47,14 @@ internal static class Program
 
         ApplicationConfiguration.Initialize();
 
-        var loginForm = AppHost.Services.GetRequiredService<LoginForm>(); // <- и тут
-        Application.Run(loginForm);
+        //  var loginForm = AppHost.Services.GetRequiredService<LoginForm>(); 
+        //Application.Run(loginForm);
+        var teacherForm = AppHost.Services.GetRequiredService<TeacherForm>();
+        Application.Run(teacherForm);
     }
 
     static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args) // <- тут всё правильно, это класс Host
+        Host.CreateDefaultBuilder(args) 
             .ConfigureAppConfiguration((context, config) =>
             {
                 config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
@@ -70,7 +72,29 @@ internal static class Program
                 services.AddScoped<MainForm>();
                 services.AddScoped<TeacherForm>();
                 services.AddScoped<AdminForm>();
-                services.AddScoped<Бассейн_п_о>();
+                //services.AddScoped<Бассейн_п_о>();
+                services.AddScoped<TaskConstructorForm>();
+                //services.AddScoped
+                //services.AddScoped
+                //services.AddScoped
+                //services.AddScoped
+                //services.AddScoped
+                //services.AddScoped
+                //services.AddScoped
+                //services.AddScoped
+                //services.AddScoped
+                //services.AddScoped
+                //services.AddScoped
+                //services.AddScoped
+                //services.AddScoped
+                //services.AddScoped
+                //services.AddScoped
+                //services.AddScoped
+                //services.AddScoped
+                //services.AddScoped
+                //services.AddScoped
+                //services.AddScoped
+                //services.AddScoped
             });
 
 }
