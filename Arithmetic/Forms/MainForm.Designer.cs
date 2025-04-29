@@ -31,7 +31,7 @@
             this.Controls.Add(this.labelWelcome);
             this.Name = "MainForm";
             this.Text = "Главное окно";
-            this.Load += new EventHandler(this.MainForm_Load);
+          //  this.Load += new EventHandler(this.MainForm_Load);
             this.ResumeLayout(false);
         }
     }

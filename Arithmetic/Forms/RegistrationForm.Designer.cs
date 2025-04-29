@@ -8,111 +8,128 @@
         private Label labelPassword;
         private Label labelDOB;
         private Label labelClass;
+        private Label labelTitle;
         private TextBox textBoxFirstName;
         private TextBox textBoxLastName;
         private TextBox textBoxPassword;
-        private DateTimePicker dateTimePickerDOB;
+        private MaskedTextBox maskedTextBoxDOB;
+        private Button buttonCalendar;
+        private MonthCalendar monthCalendar;
         private ComboBox comboBoxClass;
         private Button buttonRegister;
         private Button buttonBack;
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-                components.Dispose();
-            base.Dispose(disposing);
-        }
+
+
+        //цвета
+        private readonly Color BlueButtonColor = Color.DodgerBlue;
+        private readonly Color BlueButtonHoverColor = Color.DeepSkyBlue;
+        private readonly Color RedButtonColor = Color.IndianRed;
+        private readonly Color RedButtonHoverColor = Color.FromArgb(220, 20, 60);
 
         private void InitializeComponent()
         {
-            this.labelFirstName = new Label();
-            this.labelLastName = new Label();
-            this.labelPassword = new Label();
-            this.labelDOB = new Label();
-            this.labelClass = new Label();
-            this.textBoxFirstName = new TextBox();
-            this.textBoxLastName = new TextBox();
-            this.textBoxPassword = new TextBox();
-            this.dateTimePickerDOB = new DateTimePicker();
-            this.comboBoxClass = new ComboBox();
-            this.buttonRegister = new Button();
-            this.buttonBack = new Button();
-            this.SuspendLayout();
-
-            // labelFirstName
-            this.labelFirstName.Text = "Имя:";
-            this.labelFirstName.Location = new Point(30, 30);
-
-            // textBoxFirstName
-            this.textBoxFirstName.Location = new Point(150, 30);
-
-            // labelLastName
-            this.labelLastName.Text = "Фамилия:";
-            this.labelLastName.Location = new Point(30, 70);
-
-            // textBoxLastName
-            this.textBoxLastName.Location = new Point(150, 70);
-
-            // labelPassword
-            this.labelPassword.Text = "Пароль:";
-            this.labelPassword.Location = new Point(30, 110);
-
-            // textBoxPassword
-            this.textBoxPassword.Location = new Point(150, 110);
-            this.textBoxPassword.UseSystemPasswordChar = true;
-
-            // labelDOB
-            this.labelDOB.Text = "Дата рождения:";
-            this.labelDOB.Location = new Point(30, 150);
-
-            // dateTimePickerDOB
-            this.dateTimePickerDOB.Location = new Point(150, 150);
-
-            // labelClass
-            this.labelClass.Text = "Класс:";
-            this.labelClass.Location = new Point(30, 190);
-
-            // comboBoxClass
-            this.comboBoxClass.Location = new Point(150, 190);
-
-            // buttonRegister
-            this.buttonRegister.Text = "Зарегистрироваться";
-            this.buttonRegister.Location = new Point(30, 240);
-            this.buttonRegister.Click += new EventHandler(this.buttonRegister_Click);
-
-            // buttonBack
-            this.buttonBack.Text = "Назад";
-            this.buttonBack.Location = new Point(200, 240);
-            this.buttonBack.Click += new EventHandler(this.buttonBack_Click);
-
-            buttonRegister.BackColor = Color.FromArgb(0, 120, 215);
-            buttonRegister.ForeColor = Color.White;
-            buttonRegister.FlatStyle = FlatStyle.Flat;
-            buttonRegister.FlatAppearance.BorderSize = 0;
-            textBoxPassword.PasswordChar = '•';
-            comboBoxClass.DropDownStyle = ComboBoxStyle.DropDownList;
-
-            buttonBack.FlatStyle = FlatStyle.Flat;
-            buttonBack.BackColor = Color.LightGray;
-
-            // RegistrationForm
-            this.ClientSize = new Size(400, 320);
-            this.Controls.Add(this.labelFirstName);
-            this.Controls.Add(this.textBoxFirstName);
-            this.Controls.Add(this.labelLastName);
-            this.Controls.Add(this.textBoxLastName);
-            this.Controls.Add(this.labelPassword);
-            this.Controls.Add(this.textBoxPassword);
-            this.Controls.Add(this.labelDOB);
-            this.Controls.Add(this.dateTimePickerDOB);
-            this.Controls.Add(this.labelClass);
-            this.Controls.Add(this.comboBoxClass);
-            this.Controls.Add(this.buttonRegister);
-            this.Controls.Add(this.buttonBack);
+            this.BackColor = Color.FromArgb(245, 250, 255);
+            this.DoubleBuffered = true;
+            this.KeyPreview = true;
+            this.WindowState = FormWindowState.Maximized;
+            this.FormBorderStyle = FormBorderStyle.None;
+            this.StartPosition = FormStartPosition.CenterScreen;
             this.Text = "Регистрация";
-            this.Load += new EventHandler(this.RegistrationForm_Load);
-            this.ResumeLayout(false);
-            this.PerformLayout();
+
+            int centerX = Screen.PrimaryScreen.Bounds.Width / 2;
+            int startY = 180;
+            int spacingY = 70;
+
+            labelTitle = new Label
+            {
+                Text = "СИРС. Регистрация ученика",
+                Font = new Font("Segoe UI", 36F, FontStyle.Bold),
+                ForeColor = Color.MidnightBlue,
+                AutoSize = false,
+                Size = new Size(1200, 100),
+                TextAlign = ContentAlignment.MiddleCenter,
+                Location = new Point((Screen.PrimaryScreen.Bounds.Width - 1200) / 2, 50)
+            };
+
+            labelFirstName = new Label { Text = "Имя:", Font = new Font("Segoe UI", 20F), Location = new Point(centerX - 350, startY), Size = new Size(150, 50) };
+            textBoxFirstName = new TextBox { Font = new Font("Segoe UI", 18F), Location = new Point(centerX - 150, startY), Size = new Size(300, 40) };
+
+            labelLastName = new Label { Text = "Фамилия:", Font = new Font("Segoe UI", 20F), Location = new Point(centerX - 350, startY + spacingY), Size = new Size(150, 50) };
+            textBoxLastName = new TextBox { Font = new Font("Segoe UI", 18F), Location = new Point(centerX - 150, startY + spacingY), Size = new Size(300, 40) };
+
+            labelPassword = new Label { Text = "Пароль:", Font = new Font("Segoe UI", 20F), Location = new Point(centerX - 350, startY + 2 * spacingY), Size = new Size(150, 50) };
+            textBoxPassword = new TextBox { Font = new Font("Segoe UI", 18F), Location = new Point(centerX - 150, startY + 2 * spacingY), Size = new Size(300, 40), UseSystemPasswordChar = true };
+
+            labelDOB = new Label { Text = "Дата рождения:", Font = new Font("Segoe UI", 20F), Location = new Point(centerX - 350, startY + 3 * spacingY), Size = new Size(250, 50) };
+
+
+            buttonCalendar = new Button
+            {
+                Text = "📅",
+                Font = new Font("Segoe UI", 14F, FontStyle.Bold),
+                Size = new Size(40, 40),
+                Location = new Point(centerX + 60, startY + 3 * spacingY),
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.LightGray
+            };
+            buttonCalendar.FlatAppearance.BorderSize = 0;
+
+
+
+
+
+            labelClass = new Label { Text = "Класс:", Font = new Font("Segoe UI", 20F), Location = new Point(centerX - 350, startY + 4 * spacingY), Size = new Size(150, 50) };
+            comboBoxClass = new ComboBox { Font = new Font("Segoe UI", 18F), Location = new Point(centerX - 150, startY + 4 * spacingY), Size = new Size(300, 40), DropDownHeight = 450 };
+
+            buttonRegister = new Button
+            {
+                Text = "Зарегистрироваться",
+                Font = new Font("Segoe UI", 20F, FontStyle.Bold),
+                BackColor = BlueButtonColor,
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Size = new Size(300, 70),
+                Location = new Point(centerX - 350, startY + 5 * spacingY)
+            };
+            buttonRegister.FlatAppearance.BorderSize = 0;
+            buttonRegister.Click += buttonRegister_Click;
+            buttonRegister.MouseEnter += ButtonRegister_MouseEnter;
+            buttonRegister.MouseLeave += ButtonRegister_MouseLeave;
+
+            buttonBack = new Button
+            {
+                Text = "Назад",
+                Font = new Font("Segoe UI", 20F, FontStyle.Bold),
+                BackColor = RedButtonColor,
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Size = new Size(300, 70),
+                Location = new Point(centerX + 50, startY + 5 * spacingY)
+            };
+            buttonBack.FlatAppearance.BorderSize = 0;
+            buttonBack.Click += buttonBack_Click;
+            buttonBack.MouseEnter += ButtonBack_MouseEnter;
+            buttonBack.MouseLeave += ButtonBack_MouseLeave;
+
+            Controls.Add(labelTitle);
+            Controls.Add(labelFirstName);
+            Controls.Add(textBoxFirstName);
+            Controls.Add(labelLastName);
+            Controls.Add(textBoxLastName);
+            Controls.Add(labelPassword);
+            Controls.Add(textBoxPassword);
+            Controls.Add(labelDOB);
+            Controls.Add(maskedTextBoxDOB);
+            Controls.Add(buttonCalendar);
+            Controls.Add(monthCalendar);
+            Controls.Add(labelClass);
+            Controls.Add(comboBoxClass);
+            Controls.Add(buttonRegister);
+            Controls.Add(buttonBack);
+
+            this.Load += RegistrationForm_Load;
         }
+
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace Arithmetic.Forms
+﻿using System.Windows.Forms;
+
+namespace Arithmetic.Forms
 {
     partial class TeacherForm
     {
@@ -48,13 +50,17 @@
             // 
             // dataGridViewTasks
             // 
-            dataGridViewTasks.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dataGridViewTasks.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+            dataGridViewTasks.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+           // dataGridViewTasks.DefaultCellStyle.WrapMode = DataGridViewTriState.True; 
+            dataGridViewTasks.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize; 
+            dataGridViewTasks.RowTemplate.Height = 50;
             dataGridViewTasks.Font = new Font("Segoe UI", 16F);
             dataGridViewTasks.Location = new Point(50, 150);
-            dataGridViewTasks.Name = "dataGridViewTasks";
-            dataGridViewTasks.RowTemplate.Height = 50;
             dataGridViewTasks.Size = new Size(1800, 671);
             dataGridViewTasks.TabIndex = 3;
+            dataGridViewTasks.CellContentClick += dataGridViewTasks_CellContentClick;
+
             // 
             // TeacherForm
             // 

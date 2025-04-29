@@ -1,22 +1,27 @@
 ﻿using System;
 using System.Windows.Forms;
 using Arithmetic.Models;
+using Arithmetic.Services;
 
 namespace Arithmetic.Forms
 {
     public partial class MainForm : Form
     {
-        private readonly User _user;
+        private readonly UserSessionService _session;
 
-        public MainForm(User user)
+        public MainForm(UserSessionService session)
         {
+            _session = session;
             InitializeComponent();
-            _user = user;
-        }
 
-        private void MainForm_Load(object sender, EventArgs e)
-        {
-            labelWelcome.Text = $"Добро пожаловать, {_user.FirstName}!";
+            var user = _session.CurrentUser;
+            labelWelcome.Text = $"Здравствуйте, {user.FirstName} {user.LastName}";
+
+            if (user.RoleId == 1)
+            {
+               // labelClass.Text = $"Класс: {user.Class?.Name}";
+            }
         }
     }
+
 }

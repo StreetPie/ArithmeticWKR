@@ -1,10 +1,15 @@
 ﻿using System;
+using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows.Forms;
 using Arithmetic.Database;
+using Arithmetic.Forms;
+using Arithmetic.Interfaces;
 using Arithmetic.Models;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Arithmetic
 {
@@ -16,11 +21,51 @@ namespace Arithmetic
         {
             _context = context;
             InitializeComponent();
-            this.BackColor = Color.White;
-            this.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point);
-            this.StartPosition = FormStartPosition.CenterScreen;
-            this.WindowState = FormWindowState.Maximized;
+            EnableBlur();
+
         }
+
+
+        private void EnableBlur()
+        {
+            var accent = new AccentPolicy();
+            accent.AccentState = 3;
+            var accentStructSize = Marshal.SizeOf(accent);
+            var accentPtr = Marshal.AllocHGlobal(accentStructSize);
+            Marshal.StructureToPtr(accent, accentPtr, false);
+
+            var data = new WindowCompositionAttributeData
+            {
+                Attribute = 19,
+                SizeOfData = accentStructSize,
+                Data = accentPtr
+            };
+
+            SetWindowCompositionAttribute(this.Handle, ref data);
+
+            Marshal.FreeHGlobal(accentPtr);
+        }
+
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct AccentPolicy
+        {
+            public int AccentState;
+            public int AccentFlags;
+            public int GradientColor;
+            public int AnimationId;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct WindowCompositionAttributeData
+        {
+            public int Attribute;
+            public IntPtr Data;
+            public int SizeOfData;
+        }
+
+        [DllImport("user32.dll")]
+        private static extern int SetWindowCompositionAttribute(IntPtr hwnd, ref WindowCompositionAttributeData data);
 
         private void RegistrationForm_Load(object sender, EventArgs e)
         {
@@ -28,11 +73,10 @@ namespace Arithmetic
             comboBoxClass.DataSource = classes;
             comboBoxClass.DisplayMember = "Name";
             comboBoxClass.ValueMember = "Id";
-            comboBoxClass.SelectedIndex = -1;
 
-            comboBoxClass.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textBoxPassword.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            buttonRegister.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            comboBoxClass.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+            comboBoxClass.AutoCompleteSource = AutoCompleteSource.ListItems;
+            comboBoxClass.SelectedIndex = -1;
         }
 
         private void buttonRegister_Click(object sender, EventArgs e)
@@ -40,8 +84,13 @@ namespace Arithmetic
             var firstName = textBoxFirstName.Text.Trim();
             var lastName = textBoxLastName.Text.Trim();
             var password = textBoxPassword.Text.Trim();
-            var dateOfBirth = dateTimePickerDOB.Value;
-            var classId = (int?)comboBoxClass.SelectedValue;
+            //var birthDate = maskedTextBoxDOB.Value;
+
+            if (!DateTime.TryParseExact(maskedTextBoxDOB.Text, "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out var birthDate))
+            {
+                MessageBox.Show("Введите корректную дату рождения.");
+                return;
+            }
 
             if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName) || string.IsNullOrEmpty(password))
             {
@@ -49,7 +98,7 @@ namespace Arithmetic
                 return;
             }
 
-            if (!classId.HasValue)
+            if (comboBoxClass.SelectedIndex == -1)
             {
                 MessageBox.Show("Выберите класс.");
                 return;
@@ -60,17 +109,24 @@ namespace Arithmetic
                 FirstName = firstName,
                 LastName = lastName,
                 PasswordHash = HashPassword(password),
-                DateOfBirth = dateOfBirth,
+                DateOfBirth = birthDate,
                 RegistrationDate = DateTime.Now,
-                RoleId = 1, // Ученик
-                ClassId = classId
+                RoleId = 1, 
+                ClassId = (int)comboBoxClass.SelectedValue
             };
-
             _context.Users.Add(user);
             _context.SaveChanges();
 
-            MessageBox.Show("Регистрация прошла успешно.");
-            this.Close();
+            using (var scope = Program.AppHost.Services.CreateScope())
+            {
+                var mainForm = scope.ServiceProvider
+                    .GetRequiredService<IFormFactory<MainForm>>()
+                    .Create(user);
+                mainForm.Show();
+            }
+
+            this.Close(); 
+
         }
 
         private string HashPassword(string password)
@@ -82,9 +138,58 @@ namespace Arithmetic
             }
         }
 
+
+
+        private class ClickOutsideMessageFilter : IMessageFilter
+        {
+            private readonly Control target;
+            private readonly Action onClickOutside;
+
+            public ClickOutsideMessageFilter(Control target, Action onClickOutside)
+            {
+                this.target = target;
+                this.onClickOutside = onClickOutside;
+            }
+
+            public bool PreFilterMessage(ref Message m)
+            {
+                if (m.Msg == 0x201) // WM_LBUTTONDOWN
+                {
+                    Point clickedPoint = Control.MousePosition;
+                    if (!target.Bounds.Contains(target.Parent.PointToClient(clickedPoint)))
+                    {
+                        onClickOutside();
+                    }
+                }
+                return false;
+            }
+        }
+
+        private void ButtonRegister_MouseEnter(object sender, EventArgs e)
+        {
+            buttonRegister.BackColor = BlueButtonHoverColor;
+        }
+
+        private void ButtonRegister_MouseLeave(object sender, EventArgs e)
+        {
+            buttonRegister.BackColor = BlueButtonColor;
+        }
+
+        private void ButtonBack_MouseEnter(object sender, EventArgs e)
+        {
+            buttonBack.BackColor = RedButtonHoverColor;
+        }
+
+        private void ButtonBack_MouseLeave(object sender, EventArgs e)
+        {
+            buttonBack.BackColor = RedButtonColor;
+        }
+
         private void buttonBack_Click(object sender, EventArgs e)
         {
             this.Close();
+            var loginForm = new LoginForm();
+            loginForm.Show();
         }
     }
 }

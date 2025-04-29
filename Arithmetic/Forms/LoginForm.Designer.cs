@@ -1,91 +1,88 @@
-﻿namespace Arithmetic
+﻿using System.Windows.Forms;
+
+namespace Arithmetic
 {
     partial class LoginForm
     {
         private Button buttonLogin;
         private Button buttonRegister;
         private Button buttonExit;
-        private Label label1;
-        private Label label2;
+        private Label labelTitle;
+        // Константы цветов
+        private readonly Color BlueButtonColor = Color.DodgerBlue;
+        private readonly Color BlueButtonHoverColor = Color.DeepSkyBlue;
+        private readonly Color RedButtonColor = Color.IndianRed;
+        private readonly Color RedButtonHoverColor = Color.FromArgb(220, 20, 60);
+
 
         private void InitializeComponent()
         {
-            buttonLogin = new Button();
-            buttonRegister = new Button();
-            buttonExit = new Button();
-            label3 = new Label();
-            label1 = new Label();
-            SuspendLayout();
-            // 
-            // buttonLogin
-            // 
-            buttonLogin.Font = new Font("Segoe UI", 16F);
-            buttonLogin.Location = new Point(600, 250);
-            buttonLogin.Name = "buttonLogin";
-            buttonLogin.Size = new Size(300, 60);
-            buttonLogin.TabIndex = 0;
-            buttonLogin.Text = "Войти";
-            buttonLogin.Click += buttonLogin_Click;
-            // 
-            // buttonRegister
-            // 
-            buttonRegister.Font = new Font("Segoe UI", 16F);
-            buttonRegister.Location = new Point(600, 350);
-            buttonRegister.Name = "buttonRegister";
-            buttonRegister.Size = new Size(300, 60);
-            buttonRegister.TabIndex = 1;
-            buttonRegister.Text = "Регистрация";
-            buttonRegister.Click += buttonRegister_Click;
-            // 
-            // buttonExit
-            // 
-            buttonExit.Font = new Font("Segoe UI", 16F);
-            buttonExit.Location = new Point(600, 450);
-            buttonExit.Name = "buttonExit";
-            buttonExit.Size = new Size(300, 60);
-            buttonExit.TabIndex = 2;
-            buttonExit.Text = "Выход";
-            buttonExit.Click += buttonExit_Click;
-            // 
-            // label3
-            // 
-            label3.AutoSize = true;
-            label3.Location = new Point(591, 104);
-            label3.Name = "label3";
-            label3.Size = new Size(309, 15);
-            label3.TabIndex = 3;
-            label3.Text = "СИРС. Арифметические задачи на совместную работу";
-            label3.Click += label3_Click;
-            // 
-            // label1
-            // 
-            label1.AutoSize = true;
-            label1.Location = new Point(600, 188);
-            label1.Name = "label1";
-            label1.Size = new Size(274, 15);
-            label1.TabIndex = 4;
-            label1.Text = " Арифметические задачи на совместную работу";
-            label1.Click += label1_Click_1;
-            // 
-            // LoginForm
-            // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1500, 800);
-            Controls.Add(label1);
-            Controls.Add(label3);
-            Controls.Add(buttonLogin);
-            Controls.Add(buttonRegister);
-            Controls.Add(buttonExit);
-            FormBorderStyle = FormBorderStyle.None;
-            Name = "LoginForm";
-            StartPosition = FormStartPosition.CenterScreen;
-            Text = "Добро пожаловать";
-            Load += LoginForm_Load;
-            ResumeLayout(false);
-            PerformLayout();
+            this.buttonLogin = new Button();
+            this.buttonRegister = new Button();
+            this.buttonExit = new Button();
+            this.labelTitle = new Label();
+            this.SuspendLayout();
 
+            // Label Title
+            this.labelTitle.Text = "СИРС\nАрифметические задачи на совместную работу";
+            this.labelTitle.Font = new Font("Segoe UI", 36F, FontStyle.Bold);
+            this.labelTitle.ForeColor = Color.MidnightBlue;
+            this.labelTitle.TextAlign = ContentAlignment.MiddleCenter;
+            this.labelTitle.Size = new Size(1200, 200);
+            this.labelTitle.Location = new Point((Screen.PrimaryScreen.Bounds.Width - this.labelTitle.Width) / 2, 50);
+
+            // buttonLogin
+            this.buttonLogin.Text = "Войти";
+            this.buttonLogin.Font = new Font("Segoe UI", 24F, FontStyle.Bold);
+            this.buttonLogin.Size = new Size(400, 90);
+            this.buttonLogin.Location = new Point((Screen.PrimaryScreen.Bounds.Width - 400) / 2, 300);
+            this.buttonLogin.BackColor = BlueButtonColor;
+            this.buttonLogin.ForeColor = Color.White;
+            this.buttonLogin.FlatStyle = FlatStyle.Flat;
+            this.buttonLogin.FlatAppearance.BorderSize = 0;
+            buttonLogin.MouseEnter += ButtonLogin_MouseEnter;
+            buttonLogin.MouseLeave += ButtonLogin_MouseLeave;
+            this.buttonLogin.Click += buttonLogin_Click;
+
+            // buttonRegister
+            this.buttonRegister.Text = "Регистрация";
+            this.buttonRegister.Font = new Font("Segoe UI", 24F, FontStyle.Bold);
+            this.buttonRegister.Size = new Size(400, 90);
+            this.buttonRegister.Location = new Point((Screen.PrimaryScreen.Bounds.Width - 400) / 2, 420);
+            this.buttonRegister.BackColor = BlueButtonColor;
+            this.buttonRegister.ForeColor = Color.White;
+            this.buttonRegister.FlatStyle = FlatStyle.Flat;
+            this.buttonRegister.FlatAppearance.BorderSize = 0;
+            buttonRegister.MouseEnter += ButtonRegister_MouseEnter;
+            buttonRegister.MouseLeave += ButtonRegister_MouseLeave;
+            this.buttonRegister.Click += buttonRegister_Click;
+
+
+            // buttonExit
+            this.buttonExit.Text = "Выход";
+            this.buttonExit.Font = new Font("Segoe UI", 24F, FontStyle.Bold);
+            this.buttonExit.Size = new Size(400, 90);
+            this.buttonExit.Location = new Point((Screen.PrimaryScreen.Bounds.Width - 400) / 2, 540);
+            this.buttonExit.BackColor = RedButtonColor;
+            this.buttonExit.ForeColor = Color.White;
+            this.buttonExit.FlatStyle = FlatStyle.Flat;
+            this.buttonExit.FlatAppearance.BorderSize = 0;
+            buttonExit.MouseEnter += ButtonExit_MouseEnter;
+            buttonExit.MouseLeave += ButtonExit_MouseLeave;
+
+            this.buttonExit.Click += buttonExit_Click;
+
+
+            // LoginForm
+            this.ClientSize = new Size(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
+            this.Controls.Add(this.labelTitle);
+            this.Controls.Add(this.buttonLogin);
+            this.Controls.Add(this.buttonRegister);
+            this.Controls.Add(this.buttonExit);
+            this.FormBorderStyle = FormBorderStyle.None;
+            this.StartPosition = FormStartPosition.CenterScreen;
+            this.Text = "Добро пожаловать в СИРС";
+            this.ResumeLayout(false);
         }
-        private Label label3;
     }
 }
