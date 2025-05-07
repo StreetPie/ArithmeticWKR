@@ -9,12 +9,12 @@ namespace Arithmetic.Forms
 {
     public partial class StudentsListForm : Form
     {
-        private readonly AppDbContext _dbContext;
+        private readonly IServiceScopeFactory _scopeFactory;
 
-        public StudentsListForm(AppDbContext dbContext)
+        public StudentsListForm(IServiceScopeFactory scopeFactory)
         {
             InitializeComponent();
-            _dbContext = dbContext;
+            _scopeFactory = scopeFactory;
             LoadStudentsRating();
             ApplyColorByScore();
             ApplyMedals();
@@ -22,47 +22,57 @@ namespace Arithmetic.Forms
 
         private void LoadStudentsRating()
         {
-            var students = _dbContext.Users
-                .Where(u => u.RoleId == 1)
-                .ToList(); // Сначала забираем учеников
+      
+            using (var scope = _scopeFactory.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-            var results = _dbContext.Results
-                .AsEnumerable(); 
+                var students = dbContext.Users
+                    .Where(u => u.RoleId == 1)
+                    .ToList(); 
 
-            var ratings = students
-                .Select(user => new
-                {
-                    FullName = user.FirstName + " " + user.LastName,
-                    AverageScore = results
-                        .Where(r => r.StudentId == user.Id)
-                        .Select(r => (double?)r.Score)
-                        .DefaultIfEmpty(0)
-                        .Average(),
-                    TestCount = results
-                        .Count(r => r.StudentId == user.Id),
-                    LastTestDate = results
-                        .Where(r => r.StudentId == user.Id)
-                        .OrderByDescending(r => r.SubmissionDate)
-                        .Select(r => r.SubmissionDate)
-                        .FirstOrDefault()
-                })
-                .OrderByDescending(s => s.AverageScore)
-                .ToList();
+                var results = dbContext.Results.AsEnumerable();
 
-            dgvStudents.DataSource = ratings;
+                var ratings = students
+    .Select(user => {
+        var userResults = results.Where(r => r.StudentId == user.Id).ToList();
+        var lastResult = userResults
+            .OrderByDescending(r => r.SubmissionDate)
+            .FirstOrDefault();
+
+        var lastTestName = lastResult != null
+            ? dbContext.Tests.FirstOrDefault(t => t.Id == lastResult.TestId)?.Name
+            : "—";
+
+        return new
+        {
+            FullName = user.FirstName + " " + user.LastName,
+            AverageScore = userResults.Select(r => (double?)r.Score).DefaultIfEmpty(0).Average(),
+            TestCount = userResults.Count,
+            LastTestDate = lastResult?.SubmissionDate,
+            LastTestName = lastTestName
+        };
+    })
+    .OrderByDescending(s => s.AverageScore)
+    .ToList();
+
+                dgvStudents.DataSource = ratings;
+            }
         }
+
         private void ApplyMedals()
         {
             for (int i = 0; i < dgvStudents.Rows.Count; i++)
             {
                 if (i == 0)
-                    dgvStudents.Rows[i].DefaultCellStyle.BackColor = Color.Gold; // 🥇
+                    dgvStudents.Rows[i].DefaultCellStyle.BackColor = Color.Gold; 
                 else if (i == 1)
-                    dgvStudents.Rows[i].DefaultCellStyle.BackColor = Color.Silver; // 🥈
+                    dgvStudents.Rows[i].DefaultCellStyle.BackColor = Color.Silver; 
                 else if (i == 2)
-                    dgvStudents.Rows[i].DefaultCellStyle.BackColor = Color.Peru; // 🥉
+                    dgvStudents.Rows[i].DefaultCellStyle.BackColor = Color.Peru; 
             }
         }
+
         private void ApplyColorByScore()
         {
             foreach (DataGridViewRow row in dgvStudents.Rows)
@@ -80,11 +90,15 @@ namespace Arithmetic.Forms
                 }
             }
         }
+
         private void DgvStudents_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
         {
+            dgvStudents.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+            dgvStudents.AutoResizeColumns();
             ApplyColorByScore();
             ApplyMedals();
         }
+
         private void BtnExportExcel_Click(object sender, EventArgs e)
         {
             if (dgvStudents.Rows.Count == 0)
@@ -104,7 +118,6 @@ namespace Arithmetic.Forms
                 {
                     using (StreamWriter sw = new StreamWriter(saveFileDialog.FileName, false, Encoding.UTF8))
                     {
-                        // Заголовки
                         for (int i = 0; i < dgvStudents.Columns.Count; i++)
                         {
                             sw.Write(dgvStudents.Columns[i].HeaderText);
@@ -112,7 +125,7 @@ namespace Arithmetic.Forms
                         }
                         sw.WriteLine();
 
-                        // Данные
+                      
                         foreach (DataGridViewRow row in dgvStudents.Rows)
                         {
                             for (int i = 0; i < dgvStudents.Columns.Count; i++)
@@ -134,6 +147,7 @@ namespace Arithmetic.Forms
                 }
             }
         }
+
         private void dgvStudents_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
@@ -141,18 +155,22 @@ namespace Arithmetic.Forms
                 var selectedRow = dgvStudents.Rows[e.RowIndex];
                 var fullName = selectedRow.Cells["FullName"].Value.ToString();
 
-                // Найти ID ученика
-                var student = _dbContext.Users
-                    .FirstOrDefault(u => (u.FirstName + " " + u.LastName) == fullName && u.RoleId == 1);
-
-                if (student != null)
+                using (var scope = _scopeFactory.CreateScope())
                 {
-                    var progressForm = new ProgressChartForm(student.Id, fullName, _dbContext);
-                    progressForm.ShowDialog();
+                    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+                  
+                    var student = dbContext.Users
+                        .FirstOrDefault(u => (u.FirstName + " " + u.LastName) == fullName && u.RoleId == 1);
+
+                    if (student != null)
+                    {
+                        var progressForm = new ProgressChartForm(student.Id, fullName, dbContext);
+                        progressForm.ShowDialog();
+                    }
                 }
             }
         }
-
 
         private void BtnSearch_Click(object sender, EventArgs e)
         {

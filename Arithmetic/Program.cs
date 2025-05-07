@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using Arithmetic.UserControls;
 using Arithmetic.Interfaces;
 using Arithmetic.DependencyInjection;
+using Arithmetic.Services;
 
 
 namespace Arithmetic;
@@ -68,23 +69,8 @@ internal static class Program
 
                 services.RegisterFormsAndPanels(); //ну капец блин ну жесть сколько с этим париться :(
 
-                services.AddScoped<LoginForm>();
-                services.AddScoped<LoginForm2>();
-                services.AddScoped<RegistrationForm>();
-                services.AddScoped<MainForm>();
-                services.AddScoped<TeacherForm>();
-                services.AddScoped<AdminForm>();
-                services.AddScoped<TaskConstructorForm>();
-                services.AddScoped<ProgressChartForm>();
-                services.AddScoped<StudentsListForm>();
-                services.AddScoped<TestConstructorForm>();
-                services.AddScoped<AddUserPanel>();
-                services.AddScoped<AssignTeacherClassesPanel>();
-                services.AddScoped<CreateClassPanel>();
-                services.AddScoped<EditUserPanel>();
-                services.AddScoped<MoveStudentPanel>();
-                services.AddScoped<ResetPasswordPanel>();
-                //Не забывай добавлять по мере создания форм и прочего, требующего данные из бд, иначе если не через DI, то все диспознится!
+                services.AddSingleton<UserSessionService>();
+                services.AddSingleton<BlurService>();
 
             });
 

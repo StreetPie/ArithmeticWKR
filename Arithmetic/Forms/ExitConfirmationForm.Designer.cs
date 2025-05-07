@@ -3,7 +3,7 @@
     partial class ExitConfirmationForm
     {
 
-        private void InitializeComponent()
+        private void InitializeComponent(string message)
         {
             this.FormBorderStyle = FormBorderStyle.None;
             this.StartPosition = FormStartPosition.CenterScreen;
@@ -11,11 +11,11 @@
             this.BackColor = Color.FromArgb(240, 240, 240);
             this.TopMost = true;
             this.DoubleBuffered = true;
-            this.Opacity = 0; // Для плавного появления
+            this.Opacity = 0;
 
             var label = new Label()
             {
-                Text = "Вы уверены, что хотите выйти?",
+                Text = message,
                 Font = new Font("Segoe UI", 18F, FontStyle.Bold),
                 AutoSize = false,
                 TextAlign = ContentAlignment.MiddleCenter,
@@ -51,6 +51,5 @@
 
             this.Paint += ExitConfirmationForm_Paint;
         }
-
     }
-}
+    }

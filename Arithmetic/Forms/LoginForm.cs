@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Arithmetic.Forms;
+using Arithmetic.Services;
 
 namespace Arithmetic
 {
@@ -13,10 +14,13 @@ namespace Arithmetic
         public LoginForm()
         {
             InitializeComponent();
+            BlurService.EnableBlur(this); 
+
             this.WindowState = FormWindowState.Maximized;
-            EnableBlur();
+          //  EnableBlur();
             this.Opacity = 0;
             FadeInForm();
+
         }
 
         private async void FadeInForm()

@@ -16,6 +16,8 @@ namespace Arithmetic.Database
         public DbSet<TestTask> TestTasks { get; set; }
         public DbSet<Result> Results { get; set; }
         public DbSet<TaskResult> TaskResults { get; set; }
+        public DbSet<CompletedChapter> CompletedChapters { get; set; }
+        public DbSet<CompletedParagraph> CompletedParagraphs { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)

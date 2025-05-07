@@ -8,9 +8,13 @@ using Arithmetic.Models;
 using Arithmetic.Database;
 using Arithmetic.UserControls;
 using Arithmetic.Interfaces;
+using Arithmetic.Services;
+using Microsoft.VisualBasic.ApplicationServices;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Arithmetic.Forms
 {
+
     public partial class AdminForm : Form
     {
         private readonly IFormFactory<AddUserPanel> _addUserFactory;
@@ -19,13 +23,18 @@ namespace Arithmetic.Forms
         private readonly IFormFactory<EditUserPanel> _editUserFactory;
         private readonly IFormFactory<MoveStudentPanel> _moveStudentFactory;
         private readonly IFormFactory<ResetPasswordPanel> _resetPasswordFactory;
-        private readonly AppDbContext _context;
+        private readonly UserSessionService _session;
+        private readonly IServiceScopeFactory _scopeFactory;
+        private SplitContainer splitContainer;
 
 
         private readonly IServiceProvider _provider;
+        private IServiceScope _editPanelScope; // добавь это поле в класс AdminForm
+
 
         public AdminForm(
-            AppDbContext context,
+            UserSessionService session,
+            IServiceScopeFactory scopeFactory,
             IFormFactory<AddUserPanel> addUserFactory,
             IFormFactory<AssignTeacherClassesPanel> assignFactory,
             IFormFactory<CreateClassPanel> createClassFactory,
@@ -33,17 +42,27 @@ namespace Arithmetic.Forms
             IFormFactory<MoveStudentPanel> moveStudentFactory,
             IFormFactory<ResetPasswordPanel> resetPasswordFactory)
         {
-            _context = context;
+            _session = session;
+            _scopeFactory = scopeFactory;
             _addUserFactory = addUserFactory;
             _assignFactory = assignFactory;
             _createClassFactory = createClassFactory;
             _editUserFactory = editUserFactory;
             _moveStudentFactory = moveStudentFactory;
             _resetPasswordFactory = resetPasswordFactory;
-            EnableBlur();
             InitializeComponent();
+            BlurService.EnableBlur(this);
+            this.WindowState = FormWindowState.Maximized;
+            this.FormBorderStyle = FormBorderStyle.None;
+
         }
 
+        private void AdminForm_Load(object sender, EventArgs e)
+        {
+            LoadTeachers();
+            LoadStudents();
+
+        }
 
 
         private void ShowControl(UserControl control)
@@ -54,24 +73,7 @@ namespace Arithmetic.Forms
             panelRightContainer.Visible = true;
         }
 
-        private void EnableBlur()
-        {
-            var accent = new AccentPolicy();
-            accent.AccentState = 3;
 
-            var accentStructSize = Marshal.SizeOf(accent);
-            var accentPtr = Marshal.AllocHGlobal(accentStructSize);
-            Marshal.StructureToPtr(accent, accentPtr, false);
-
-            var data = new WindowCompositionAttributeData();
-            data.Attribute = 19;
-            data.SizeOfData = accentStructSize;
-            data.Data = accentPtr;
-
-            SetWindowCompositionAttribute(this.Handle, ref data);
-
-            Marshal.FreeHGlobal(accentPtr);
-        }
 
         [StructLayout(LayoutKind.Sequential)]
         private struct AccentPolicy
@@ -95,52 +97,90 @@ namespace Arithmetic.Forms
 
         private void LoadTeachers()
         {
-            var teachers = _context.Users
-                .Where(u => u.RoleId == 2)
-                .Select(u => new
-                {
-                    u.Id,
-                    Имя = u.FirstName,
-                    Фамилия = u.LastName,
-                    Дата_рождения = u.DateOfBirth.ToShortDateString(),
-                    Зарегистрирован = u.RegistrationDate.ToShortDateString()
-                })
-                .ToList();
+            try
+            {
+                using var scope = _scopeFactory.CreateScope();
+                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-            dataGridViewTeachers.DataSource = teachers;
+                var teachers = context.Users
+                    .Where(u => u.RoleId == 2)
+                    .Select(u => new
+                    {
+                        u.Id,
+                        Имя = u.FirstName,
+                        Фамилия = u.LastName,
+                        Зарегистрирован = u.RegistrationDate.ToShortDateString()
+
+                    })
+                    .ToList();
+
+                if (teachers == null || teachers.Count == 0)
+                {
+                    MessageBox.Show("Нет данных для отображения учителей.");
+                }
+
+                dataGridViewTeachers.DataSource = teachers;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при загрузке данных учителей: {ex.Message}");
+            }
         }
 
         private void LoadStudents()
         {
-            var students = _context.Users
-                .Include(u => u.Class)
-                .Where(u => u.RoleId == 1)
-                .Select(u => new
-                {
-                    u.Id,
-                    Имя = u.FirstName,
-                    Фамилия = u.LastName,
-                    Класс = u.Class.Name,
-                    Дата_рождения = u.DateOfBirth.ToShortDateString(),
-                    Зарегистрирован = u.RegistrationDate.ToShortDateString()
-                })
-                .ToList();
+            try
+            {
+                using var scope = _scopeFactory.CreateScope();
+                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-            dataGridViewStudents.DataSource = students;
+                var students = context.Users
+                    .Include(u => u.Class)
+                    .Where(u => u.RoleId == 1)
+                    .Select(u => new
+                    {
+                        u.Id,
+                        Имя = u.FirstName,
+                        Фамилия = u.LastName,
+                        Класс = u.Class.Name,
+                        Дата_рождения = u.DateOfBirth.ToShortDateString(),
+                        Зарегистрирован = u.RegistrationDate.ToShortDateString()
+                    })
+                    .ToList();
+
+                if (students == null || students.Count == 0)
+                {
+                    MessageBox.Show("Нет данных для отображения студентов.");
+                }
+
+                dataGridViewStudents.DataSource = students;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при загрузке данных студентов: {ex.Message}");
+            }
         }
 
-        private User GetSelectedUser(DataGridView dgv)
+
+        private Arithmetic.Models.User GetSelectedUser(DataGridView dgv)
         {
             if (dgv.SelectedRows.Count == 0)
                 return null;
 
             int userId = Convert.ToInt32(dgv.SelectedRows[0].Cells["Id"].Value);
-            return _context.Users.Include(u => u.Class).FirstOrDefault(u => u.Id == userId);
+
+            using var scope = _scopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            return context.Users.Include(u => u.Class).FirstOrDefault(u => u.Id == userId);
         }
+
 
         private void ButtonAddUser_Click(object sender, EventArgs e)
         {
-            var panel = _addUserFactory.Create(_context);
+            using var scope = _scopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var panel = _addUserFactory.Create(context);
+
             panel.OnUserAdded += () =>
             {
                 LoadTeachers();
@@ -150,23 +190,32 @@ namespace Arithmetic.Forms
         }
 
 
+
         private void ButtonEditUser_Click(object sender, EventArgs e)
         {
-            var user = GetSelectedUser(dataGridViewTeachers) ?? GetSelectedUser(dataGridViewStudents);
-            if (user == null)
+            var selected = GetSelectedUser(dataGridViewTeachers) ?? GetSelectedUser(dataGridViewStudents);
+            if (selected == null)
             {
                 MessageBox.Show("Выберите пользователя");
                 return;
             }
 
-            var panel = _editUserFactory.Create(_context, user);
+            _editPanelScope?.Dispose();
+            _editPanelScope = _scopeFactory.CreateScope();
+
+            // просто передай user.Id
+            var panel = _editUserFactory.Create(selected.Id);
             panel.UserUpdated += (_, __) =>
             {
                 LoadTeachers();
                 LoadStudents();
             };
+            panel.Disposed += (_, __) => _editPanelScope?.Dispose();
+
             ShowControl(panel);
         }
+
+
 
         private void ButtonDeleteUser_Click(object sender, EventArgs e)
         {
@@ -176,12 +225,14 @@ namespace Arithmetic.Forms
                 MessageBox.Show("Выберите пользователя");
                 return;
             }
+            using var scope = _scopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
             var confirm = MessageBox.Show("Удалить пользователя?", "Подтверждение", MessageBoxButtons.YesNo);
             if (confirm == DialogResult.Yes)
             {
-                _context.Users.Remove(user);
-                _context.SaveChanges();
+                context.Users.Remove(user);
+                context.SaveChanges();
                 LoadTeachers();
                 LoadStudents();
             }
@@ -195,22 +246,26 @@ namespace Arithmetic.Forms
                 MessageBox.Show("Выберите пользователя");
                 return;
             }
+            using var scope = _scopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-            var panel = _resetPasswordFactory.Create(_context, user);
+            var panel = _resetPasswordFactory.Create(context, user);
             ShowControl(panel);
         }
 
 
         private void ButtonMoveStudent_Click(object sender, EventArgs e)
         {
-            var student = GetSelectedUser(dataGridViewStudents);
-            if (student == null || student.RoleId != 1)
+            var user = GetSelectedUser(dataGridViewStudents);
+            if (user == null || user.RoleId != 1)
             {
                 MessageBox.Show("Выберите ученика");
                 return;
             }
+            using var scope = _scopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-            var panel = _moveStudentFactory.Create(_context, student);
+            var panel = _moveStudentFactory.Create(context, user);
             panel.StudentMoved += (_, __) => LoadStudents();
             ShowControl(panel);
         }
@@ -218,22 +273,28 @@ namespace Arithmetic.Forms
 
         private void ButtonAssignTeacherClasses_Click(object sender, EventArgs e)
         {
-            var teacher = GetSelectedUser(dataGridViewTeachers);
-            if (teacher == null || teacher.RoleId != 2)
+            var user = GetSelectedUser(dataGridViewTeachers);
+            if (user == null || user.RoleId != 2)
             {
                 MessageBox.Show("Выберите учителя");
                 return;
             }
+            using var scope = _scopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-            var panel = _assignFactory.Create(_context, teacher);
+            var panel = _assignFactory.Create(context, user);
             ShowControl(panel);
         }
 
         private void ButtonCreateClass_Click(object sender, EventArgs e)
         {
-            var panel = _createClassFactory.Create(_context);
+            using var scope = _scopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            var panel = _createClassFactory.Create(context);
             ShowControl(panel);
         }
+
 
     }
 }

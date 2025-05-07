@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Arithmetic.Models;
 using Arithmetic.Database;
+using Microsoft.EntityFrameworkCore;
 
 namespace Arithmetic.Services
 {
@@ -30,41 +29,98 @@ namespace Arithmetic.Services
 
             var userId = CurrentUser.Id;
 
+            // Загружаем результаты тестов
             TestResults = context.Results
                 .Where(r => r.StudentId == userId)
                 .ToList();
 
+            // Загружаем TaskResults через Result.StudentId
             TaskResults = context.TaskResults
-                .Where(tr => tr.StudentId == userId)
+                .Include(tr => tr.Result)
+                .Where(tr => tr.Result.StudentId == userId)
                 .ToList();
 
-            // Предполагаем, что есть таблицы CompletedParagraphs и CompletedChapters
-            CompletedParagraphIds = context.SchoolTasks
-                .Where(t => t.ParagraphId != null &&
-                            context.TaskResults
-                                .Any(tr => tr.StudentId == userId && tr.TaskId == t.Id))
-                .Select(t => t.ParagraphId.Value)
-                .Distinct()
+            // Загружаем завершённые параграфы и главы
+            CompletedParagraphIds = context.CompletedParagraphs
+                .Where(cp => cp.UserId == userId)
+                .Select(cp => cp.ParagraphId)
                 .ToList();
 
-            CompletedChapterIds = context.Paragraphs
-                .Where(p => CompletedParagraphIds.Contains(p.Id))
-                .Select(p => p.ChapterId)
-                .Distinct()
+            CompletedChapterIds = context.CompletedChapters
+                .Where(cc => cc.UserId == userId)
+                .Select(cc => cc.ChapterId)
                 .ToList();
         }
 
-        public void Clear()
+        public void SaveTestResult(AppDbContext context, Result result)
         {
-            CurrentUser = null;
-            TestResults.Clear();
-            TaskResults.Clear();
-            CompletedParagraphIds.Clear();
-            CompletedChapterIds.Clear();
+            if (CurrentUser == null)
+                return;
+
+            result.StudentId = CurrentUser.Id;
+            context.Results.Add(result);
+            context.SaveChanges();
         }
 
-        public bool IsAuthenticated => CurrentUser != null;
+        public void SaveTaskResult(AppDbContext context, TaskResult taskResult)
+        {
+            context.TaskResults.Add(taskResult);
+            context.SaveChanges();
+        }
+
+        public void MarkParagraphCompleted(AppDbContext context, int paragraphId)
+        {
+            if (CurrentUser == null) return;
+
+            if (!CompletedParagraphIds.Contains(paragraphId))
+            {
+                context.CompletedParagraphs.Add(new CompletedParagraph
+                {
+                    UserId = CurrentUser.Id,
+                    ParagraphId = paragraphId
+                });
+                context.SaveChanges();
+
+                CompletedParagraphIds.Add(paragraphId); // обновляем локально
+            }
+
+            // Проверка: завершены ли все параграфы главы
+            var chapterId = context.Paragraphs
+                .Where(p => p.Id == paragraphId)
+                .Select(p => p.ChapterId)
+                .FirstOrDefault();
+
+            if (chapterId != 0)
+            {
+                var allParagraphsInChapter = context.Paragraphs
+                    .Where(p => p.ChapterId == chapterId)
+                    .Select(p => p.Id)
+                    .ToList();
+
+                var completedAll = allParagraphsInChapter.All(id => CompletedParagraphIds.Contains(id));
+
+                if (completedAll && !CompletedChapterIds.Contains(chapterId))
+                {
+                    context.CompletedChapters.Add(new CompletedChapter
+                    {
+                        UserId = CurrentUser.Id,
+                        ChapterId = chapterId
+                    });
+                    context.SaveChanges();
+
+                    CompletedChapterIds.Add(chapterId); // обновляем локально
+                }
+            }
+        }
+
+
+
+
+
+        public bool IsParagraphCompleted(int paragraphId) =>
+            CompletedParagraphIds.Contains(paragraphId);
+
+        public bool IsChapterCompleted(int chapterId) =>
+            CompletedChapterIds.Contains(chapterId);
     }
-
-
 }

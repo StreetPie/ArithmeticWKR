@@ -8,7 +8,14 @@ namespace Arithmetic.Forms
         private Button buttonStudents;
         private Button buttonProgress;
         private DataGridView dataGridViewTasks;
+        private Button buttonBack;
 
+
+        // Константы цветов
+        private readonly Color BlueButtonColor = Color.DodgerBlue;
+        private readonly Color BlueButtonHoverColor = Color.DeepSkyBlue;
+        private readonly Color RedButtonColor = Color.IndianRed;
+        private readonly Color RedButtonHoverColor = Color.FromArgb(220, 20, 60);
         private void InitializeComponent()
         {
             buttonTaskConstructor = new Button();
@@ -61,6 +68,18 @@ namespace Arithmetic.Forms
             dataGridViewTasks.TabIndex = 3;
             dataGridViewTasks.CellContentClick += dataGridViewTasks_CellContentClick;
 
+
+            // Button "Назад"
+            buttonBack = new Button();
+            buttonBack.Text = "Назад";
+            buttonBack.Size = new Size(200, 60);
+            buttonBack.BackColor = RedButtonColor;
+            buttonBack.ForeColor = Color.White;
+            buttonBack.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
+            buttonBack.FlatStyle = FlatStyle.Flat;
+            buttonBack.FlatAppearance.BorderSize = 0;
+
+
             // 
             // TeacherForm
             // 
@@ -69,8 +88,18 @@ namespace Arithmetic.Forms
             Controls.Add(buttonStudents);
             Controls.Add(buttonProgress);
             Controls.Add(dataGridViewTasks);
+            this.Controls.Add(buttonBack);
+            buttonBack.Click += buttonBack_Click;
+            buttonBack.MouseEnter += buttonBack_MouseEnter;
+            buttonBack.MouseLeave += buttonBack_MouseLeave;
+            // Правый нижний угол почти вплотную
+            buttonBack.Location = new Point(ClientSize.Width - buttonBack.Width - 30, ClientSize.Height - buttonBack.Height - 30);
+            buttonBack.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+
             Name = "TeacherForm";
             Text = "Панель учителя";
+
+
             ((System.ComponentModel.ISupportInitialize)dataGridViewTasks).EndInit();
             ResumeLayout(false);
         }

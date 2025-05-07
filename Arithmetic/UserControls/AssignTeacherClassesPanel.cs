@@ -3,6 +3,7 @@ using System.Linq;
 using System.Windows.Forms;
 using Arithmetic.Database;
 using Arithmetic.Models;
+using Arithmetic.Services;
 
 namespace Arithmetic.UserControls
 {
@@ -10,6 +11,8 @@ namespace Arithmetic.UserControls
     {
         private readonly AppDbContext _context;
         private readonly User _teacher;
+       //private readonly Arithmetic.Models.User _user;
+
 
         public AssignTeacherClassesPanel(AppDbContext context, User teacher)
         {

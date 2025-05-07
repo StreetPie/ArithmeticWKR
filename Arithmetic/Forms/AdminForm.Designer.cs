@@ -27,7 +27,6 @@
 
         private void InitializeComponent()
         {
-
             this.dataGridViewTeachers = new DataGridView();
             this.dataGridViewStudents = new DataGridView();
             this.buttonAddUser = new Button();
@@ -39,75 +38,113 @@
             this.buttonCreateClass = new Button();
             this.panelRightContainer = new Panel();
 
+            // Цвета
+            BlueButtonColor = Color.DodgerBlue;
+            BlueButtonHoverColor = Color.DeepSkyBlue;
+            RedButtonColor = Color.IndianRed;
+            RedButtonHoverColor = Color.FromArgb(220, 20, 60);
 
+            // Таблица учителей
+            this.dataGridViewTeachers.Dock = DockStyle.Fill;
+            this.dataGridViewTeachers.ReadOnly = true;
+            this.dataGridViewTeachers.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            this.dataGridViewTeachers.MultiSelect = false;
 
-            // AdminForm
+            // Таблица учеников
+            this.dataGridViewStudents.Dock = DockStyle.Fill;
+            this.dataGridViewStudents.ReadOnly = true;
+            this.dataGridViewStudents.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            this.dataGridViewStudents.MultiSelect = false;
+
+            // TabControl
+            this.tabControlUsers = new TabControl();
+            this.tabControlUsers.Dock = DockStyle.Left;
+            this.tabControlUsers.Width = 800;
+
+            this.tabPageTeachers = new TabPage("Учителя");
+            this.tabPageStudents = new TabPage("Ученики");
+
+            this.tabPageTeachers.Controls.Add(this.dataGridViewTeachers);
+            this.tabPageStudents.Controls.Add(this.dataGridViewStudents);
+            this.tabControlUsers.TabPages.Add(this.tabPageTeachers);
+            this.tabControlUsers.TabPages.Add(this.tabPageStudents);
+
+            // Панель с кнопками справа
+            FlowLayoutPanel panelButtons = new FlowLayoutPanel();
+            panelButtons.Dock = DockStyle.Right;
+            panelButtons.Width = 300;
+            panelButtons.FlowDirection = FlowDirection.TopDown;
+            panelButtons.WrapContents = false;
+            panelButtons.Padding = new Padding(10);
+            panelButtons.AutoScroll = true;
+
+            // Добавляем кнопки с отступами
+            SetupButton(buttonAddUser, "Добавить пользователя", BlueButtonColor, ButtonAddUser_Click);
+            SetupButton(buttonEditUser, "Изменить данные", BlueButtonColor, ButtonEditUser_Click);
+            SetupButton(buttonDeleteUser, "Удалить пользователя", RedButtonColor, ButtonDeleteUser_Click);
+            SetupButton(buttonResetPassword, "Сбросить пароль", RedButtonColor, ButtonResetPassword_Click);
+            SetupButton(buttonMoveStudent, "Перевести ученика", BlueButtonColor, ButtonMoveStudent_Click);
+            SetupButton(buttonAssignTeacherClasses, "Назначить классы учителю", BlueButtonColor, ButtonAssignTeacherClasses_Click);
+            SetupButton(buttonCreateClass, "Создать класс", BlueButtonColor, ButtonCreateClass_Click);
+
+            panelButtons.Controls.Add(buttonAddUser);
+            panelButtons.Controls.Add(buttonEditUser);
+            panelButtons.Controls.Add(buttonDeleteUser);
+            panelButtons.Controls.Add(buttonResetPassword);
+            panelButtons.Controls.Add(buttonMoveStudent);
+            panelButtons.Controls.Add(buttonAssignTeacherClasses);
+            panelButtons.Controls.Add(buttonCreateClass);
+
+            // Правая панель (если используется)
+            this.panelRightContainer.Dock = DockStyle.Right;
+            this.panelRightContainer.Width = 340;
+            this.panelRightContainer.BackColor = Color.FromArgb(240, 240, 240);
+            this.panelRightContainer.Visible = false;
+
+            // Настройки формы
             this.FormBorderStyle = FormBorderStyle.None;
             this.WindowState = FormWindowState.Maximized;
             this.StartPosition = FormStartPosition.CenterScreen;
             this.Text = "Админ-панель";
 
-            // Teachers Grid
-            this.dataGridViewTeachers.Location = new Point(30, 30);
-            this.dataGridViewTeachers.Size = new Size(540, 250);
-            this.dataGridViewTeachers.ReadOnly = true;
-            this.dataGridViewTeachers.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridViewTeachers.MultiSelect = false;
-
-            // Students Grid
-            this.dataGridViewStudents.Location = new Point(30, 300);
-            this.dataGridViewStudents.Size = new Size(540, 250);
-            this.dataGridViewStudents.ReadOnly = true;
-            this.dataGridViewStudents.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridViewStudents.MultiSelect = false;
-
-            // Buttons – placement beside grids
-            int btnX = 600, btnY = 30, btnW = 200, btnH = 40, spacing = 50;
-            SetupButton(buttonAddUser, "Добавить пользователя", btnX, btnY, btnW, btnH, BlueButtonColor, ButtonAddUser_Click);
-            SetupButton(buttonEditUser, "Изменить данные", btnX, btnY + spacing, btnW, btnH, BlueButtonColor, ButtonEditUser_Click);
-            SetupButton(buttonDeleteUser, "Удалить пользователя", btnX, btnY + spacing * 2, btnW, btnH, RedButtonColor, ButtonDeleteUser_Click);
-            SetupButton(buttonResetPassword, "Сбросить пароль", btnX, btnY + spacing * 3, btnW, btnH, RedButtonColor, ButtonResetPassword_Click);
-            SetupButton(buttonMoveStudent, "Перевести ученика", btnX, btnY + spacing * 4, btnW, btnH, BlueButtonColor, ButtonMoveStudent_Click);
-            SetupButton(buttonAssignTeacherClasses, "Назначить классы учителю", btnX, btnY + spacing * 5, btnW, btnH, BlueButtonColor, ButtonAssignTeacherClasses_Click);
-            SetupButton(buttonCreateClass, "Создать класс", btnX, btnY + spacing * 6, btnW, btnH, BlueButtonColor, ButtonCreateClass_Click);
-
-            // Right panel container
-            this.panelRightContainer.Location = new Point(830, 30);
-            this.panelRightContainer.Size = new Size(340, 520);
-            this.panelRightContainer.BackColor = Color.FromArgb(240, 240, 240);
-            this.panelRightContainer.Visible = false;
-
             // Добавление на форму
-            this.Controls.Add(this.dataGridViewTeachers);
-            this.Controls.Add(this.dataGridViewStudents);
-            this.Controls.Add(this.buttonAddUser);
-            this.Controls.Add(this.buttonEditUser);
-            this.Controls.Add(this.buttonDeleteUser);
-            this.Controls.Add(this.buttonResetPassword);
-            this.Controls.Add(this.buttonMoveStudent);
-            this.Controls.Add(this.buttonAssignTeacherClasses);
-            this.Controls.Add(this.buttonCreateClass);
+            this.Controls.Add(this.tabControlUsers);
+            this.Controls.Add(panelButtons);
             this.Controls.Add(this.panelRightContainer);
 
             this.ResumeLayout(false);
+
+            this.Load += AdminForm_Load;
+            this.tabControlUsers.SelectedIndexChanged += (s, e) =>
+            {
+                if (tabControlUsers.SelectedTab == tabPageTeachers)
+                    LoadTeachers();
+                else if (tabControlUsers.SelectedTab == tabPageStudents)
+                    LoadStudents();
+            };
         }
 
 
 
-        private void SetupButton(Button button, string text, int x, int y, int width, int height, Color baseColor, EventHandler onClick)
+
+        private void SetupButton(Button button, string text, Color baseColor, EventHandler onClick)
         {
             button.Text = text;
-            button.Location = new Point(x, y);
-            button.Size = new Size(width, height);
+            button.Width = 260;
+            button.Height = 40;
+            button.Margin = new Padding(10);
             button.BackColor = baseColor;
             button.FlatStyle = FlatStyle.Flat;
             button.ForeColor = Color.White;
             button.FlatAppearance.BorderSize = 0;
             button.Cursor = Cursors.Hand;
+            button.Anchor = AnchorStyles.Top | AnchorStyles.Right;
 
             button.MouseEnter += (s, e) => button.BackColor = baseColor == BlueButtonColor ? BlueButtonHoverColor : RedButtonHoverColor;
             button.MouseLeave += (s, e) => button.BackColor = baseColor;
             button.Click += onClick;
         }
+
+
     }
 }

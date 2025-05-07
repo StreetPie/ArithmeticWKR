@@ -2,6 +2,7 @@
 using System.Windows.Forms;
 using Arithmetic.Database;
 using Arithmetic.Models;
+using Arithmetic.Services;
 
 namespace Arithmetic.UserControls
 {

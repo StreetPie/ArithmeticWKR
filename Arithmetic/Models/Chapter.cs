@@ -7,6 +7,8 @@ namespace Arithmetic.Models
     {
         [Key]
         public int Id { get; set; }
+        public string Name { get; set; }
+
 
         public virtual ICollection<Paragraph> Paragraphs { get; set; }
     }

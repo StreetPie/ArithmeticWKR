@@ -2,20 +2,22 @@
 using System.Linq;
 using System.Windows.Forms;
 using Arithmetic.Database;
+using Arithmetic.Services;
 using Arithmetic.Models;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Arithmetic.UserControls
 {
     public partial class AddUserPanel : UserControl
     {
-        private readonly AppDbContext _context;
+        private readonly IServiceScopeFactory _scopeFactory;
 
+        // Определение события
         public event Action OnUserAdded;
 
-        public AddUserPanel(AppDbContext context)
+        public AddUserPanel(IServiceScopeFactory scopeFactory)
         {
-            _context = context;
-
+            _scopeFactory = scopeFactory;
             InitializeComponent();
             LoadRoles();
             LoadClasses();
@@ -31,7 +33,10 @@ namespace Arithmetic.UserControls
 
         private void LoadClasses()
         {
-            var classes = _context.Classes.ToList();
+            using var scope = _scopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            var classes = context.Classes.ToList();
             comboClass.DataSource = classes;
             comboClass.DisplayMember = "Name";
             comboClass.ValueMember = "Id";
@@ -39,7 +44,7 @@ namespace Arithmetic.UserControls
 
         private void comboRole_SelectedIndexChanged(object sender, EventArgs e)
         {
-            comboClass.Enabled = comboRole.SelectedIndex == 0; // Только для учеников
+            comboClass.Enabled = comboRole.SelectedIndex == 0;
         }
 
         private void btnAdd_Click(object sender, EventArgs e)
@@ -55,6 +60,9 @@ namespace Arithmetic.UserControls
                 return;
             }
 
+            using var scope = _scopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
             var newUser = new User
             {
                 FirstName = firstName,
@@ -65,10 +73,11 @@ namespace Arithmetic.UserControls
                 ClassId = roleId == 1 ? (int?)comboClass.SelectedValue : null
             };
 
-            _context.Users.Add(newUser);
-            _context.SaveChanges();
+            context.Users.Add(newUser);
+            context.SaveChanges();
 
             MessageBox.Show("Пользователь добавлен");
+
             OnUserAdded?.Invoke();
         }
     }

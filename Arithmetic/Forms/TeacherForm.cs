@@ -5,18 +5,24 @@ using Arithmetic.Database;
 using Microsoft.Extensions.DependencyInjection;
 using Arithmetic.Forms.Templates;
 using Microsoft.EntityFrameworkCore;
+using Arithmetic.Services;
 
 namespace Arithmetic.Forms
 {
     public partial class TeacherForm : Form
     {
         private readonly AppDbContext _dbContext;
+        //private readonly IServiceScopeFactory _scopeFactory;
+
 
         public TeacherForm(AppDbContext dbContext)
         {
             InitializeComponent();
             _dbContext = dbContext;
-
+            BlurService.EnableBlur(this);
+            this.FormBorderStyle = FormBorderStyle.None;
+            this.WindowState = FormWindowState.Maximized;
+            this.ControlBox = false;
             LoadTasks(); 
         }
         private Dictionary<int, string> taskImages = new Dictionary<int, string>();
@@ -46,11 +52,11 @@ namespace Arithmetic.Forms
                 imageCol.Name = "Image";
                 imageCol.HeaderText = "Картинка";
                 imageCol.ImageLayout = DataGridViewImageCellLayout.Zoom;
-                imageCol.Width = 50; // маленькая ширина
+                imageCol.Width = 50; 
 
                 dataGridViewTasks.Columns.Insert(colIndex, imageCol);
 
-                dataGridViewTasks.Columns.Clear(); // Чистим старые колонки
+                dataGridViewTasks.Columns.Clear(); 
 
                 dataGridViewTasks.DataSource = tasks;
 
@@ -68,7 +74,7 @@ namespace Arithmetic.Forms
 
 
 
-                dataGridViewTasks.Columns.Insert(2, imageCol); // Вставляем после Id и Text
+                dataGridViewTasks.Columns.Insert(2, imageCol); 
 
                 foreach (DataGridViewRow row in dataGridViewTasks.Rows)
                 {
@@ -85,7 +91,6 @@ namespace Arithmetic.Forms
             }
         }
 
-// Маленькая загрузка картинок
 private Image LoadSmallImage(string path, int width, int height)
         {
             using (var img = Image.FromFile(path))
@@ -124,8 +129,36 @@ private Image LoadSmallImage(string path, int width, int height)
         }
         private void buttonStudentsList_Click(object sender, EventArgs e)
         {
-            var studentsForm = Program.AppHost.Services.GetRequiredService<StudentsListForm>();
-            studentsForm.ShowDialog();
+            using (var scope = Program.AppHost.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                var studentsForm = services.GetRequiredService<StudentsListForm>();
+                studentsForm.ShowDialog();
+            }
+        }
+        private void buttonBack_MouseEnter(object sender, EventArgs e)
+        {
+            buttonBack.BackColor = RedButtonHoverColor;
+        }
+
+        private void buttonBack_MouseLeave(object sender, EventArgs e)
+        {
+            buttonBack.BackColor = RedButtonColor;
+        }
+
+        private void buttonBack_Click(object sender, EventArgs e)
+        {
+            using (var confirmationForm = new ExitConfirmationForm("Вы точно хотите выйти из профиля?"))
+            {
+                confirmationForm.ShowDialog();
+
+                if (confirmationForm.Confirmed)
+                {
+                    var loginForm = Program.AppHost.Services.GetRequiredService<LoginForm>();
+                    loginForm.Show();
+                    this.Close();
+                }
+            }
         }
 
 

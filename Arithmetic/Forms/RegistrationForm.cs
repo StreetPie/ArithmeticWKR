@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -9,6 +10,7 @@ using Arithmetic.Database;
 using Arithmetic.Forms;
 using Arithmetic.Interfaces;
 using Arithmetic.Models;
+using Arithmetic.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Arithmetic
@@ -23,6 +25,15 @@ namespace Arithmetic
             InitializeComponent();
             EnableBlur();
 
+        }
+        protected override bool ProcessDialogKey(Keys keyData)
+        {
+            if (keyData == Keys.Enter)
+            {
+                this.SelectNextControl(this.ActiveControl, true, true, true, true);
+                return true;
+            }
+            return base.ProcessDialogKey(keyData);
         }
 
 
@@ -78,6 +89,16 @@ namespace Arithmetic
             comboBoxClass.AutoCompleteSource = AutoCompleteSource.ListItems;
             comboBoxClass.SelectedIndex = -1;
         }
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Escape && monthCalendar.Visible)
+            {
+                monthCalendar.Visible = false;
+                return true;
+            }
+
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
 
         private void buttonRegister_Click(object sender, EventArgs e)
         {
@@ -86,9 +107,21 @@ namespace Arithmetic
             var password = textBoxPassword.Text.Trim();
             //var birthDate = maskedTextBoxDOB.Value;
 
-            if (!DateTime.TryParseExact(maskedTextBoxDOB.Text, "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out var birthDate))
+            if (!maskedTextBoxDOB.MaskFull)
+            {
+                MessageBox.Show("Введите полную дату рождения.");
+                return;
+            }
+
+            if (!DateTime.TryParseExact(maskedTextBoxDOB.Text, "dd,MM,yyyy",
+                CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dob))
             {
                 MessageBox.Show("Введите корректную дату рождения.");
+                return;
+            }
+            if (dob.Year < 1900 || dob > DateTime.Today)
+            {
+                MessageBox.Show("Дата рождения должна быть в диапазоне от 1900 года до сегодняшнего дня.");
                 return;
             }
 
@@ -109,19 +142,27 @@ namespace Arithmetic
                 FirstName = firstName,
                 LastName = lastName,
                 PasswordHash = HashPassword(password),
-                DateOfBirth = birthDate,
+                DateOfBirth = dob,
                 RegistrationDate = DateTime.Now,
-                RoleId = 1, 
+                RoleId = 1,
                 ClassId = (int)comboBoxClass.SelectedValue
             };
+
+
             _context.Users.Add(user);
             _context.SaveChanges();
 
             using (var scope = Program.AppHost.Services.CreateScope())
             {
+                var session = scope.ServiceProvider.GetRequiredService<UserSessionService>();
+                session.SetUser(user);
+
+                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                session.LoadProgress(context);
+
                 var mainForm = scope.ServiceProvider
                     .GetRequiredService<IFormFactory<MainForm>>()
-                    .Create(user);
+                    .Create();
                 mainForm.Show();
             }
 

@@ -23,7 +23,7 @@ namespace Arithmetic
         {
             _context = context;
             InitializeComponent();
-            EnableBlur();
+            BlurService.EnableBlur(this); 
             this.BringToFront();
         }
 
@@ -64,7 +64,7 @@ namespace Arithmetic
         {
             IQueryable<User> query = _context.Users.Where(u => u.RoleId == roleId);
 
-            if (roleId == 1) // Ученик
+            if (roleId == 1)
             {
                 if (classId.HasValue)
                 {
@@ -73,14 +73,14 @@ namespace Arithmetic
                 query = query.Where(u => u.FirstName != null && u.LastName != null);
                 query = query.OrderBy(u => u.LastName).ThenBy(u => u.FirstName);
             }
-            else if (roleId == 2) // Учитель
+            else if (roleId == 2) 
             {
                 query = query.Where(u => u.FirstName != null && u.LastName != null);
                 query = query.OrderBy(u => u.LastName).ThenBy(u => u.FirstName);
             }
-            else if (roleId == 3) // Админ
+            else if (roleId == 3) 
             {
-                query = query.Where(u => u.FirstName != null); // Только имя
+                query = query.Where(u => u.FirstName != null); 
                 query = query.OrderBy(u => u.FirstName);
             }
 
@@ -213,55 +213,37 @@ namespace Arithmetic
 
             using (var scope = Program.AppHost.Services.CreateScope())
             {
+                var session = scope.ServiceProvider.GetRequiredService<UserSessionService>();
+                session.SetUser(user);
+                session.LoadProgress(_context); // или context внутри scope, если ты его получаешь из DI
+
                 if (user.RoleId == 1)
                 {
-                    var session = scope.ServiceProvider.GetRequiredService<UserSessionService>();
-                    session.SetUser(user);
                     var mainForm = scope.ServiceProvider
                         .GetRequiredService<IFormFactory<MainForm>>()
-                        .Create(user);
+                        .Create(); // без передачи user — он теперь в UserSessionService
                     mainForm.Show();
-                    this.Hide();
                 }
                 else if (user.RoleId == 2)
                 {
                     var teacherForm = scope.ServiceProvider
                         .GetRequiredService<IFormFactory<TeacherForm>>()
-                        .Create(user);
+                        .Create();
                     teacherForm.Show();
-                    this.Hide();
                 }
                 else if (user.RoleId == 3)
                 {
                     var adminForm = scope.ServiceProvider
                         .GetRequiredService<IFormFactory<AdminForm>>()
-                        .Create(user);
+                        .Create();
                     adminForm.Show();
-                    this.Hide();
                 }
+
+                this.Hide();
             }
 
 
-        }
 
-
-        private void EnableBlur()
-        {
-            var accent = new AccentPolicy();
-            accent.AccentState = 3;
-
-            var accentStructSize = Marshal.SizeOf(accent);
-            var accentPtr = Marshal.AllocHGlobal(accentStructSize);
-            Marshal.StructureToPtr(accent, accentPtr, false);
-
-            var data = new WindowCompositionAttributeData();
-            data.Attribute = 19;
-            data.SizeOfData = accentStructSize;
-            data.Data = accentPtr;
-
-            SetWindowCompositionAttribute(this.Handle, ref data);
-
-            Marshal.FreeHGlobal(accentPtr);
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -280,14 +262,20 @@ namespace Arithmetic
             public IntPtr Data;
             public int SizeOfData;
         }
+        //private string HashPassword(string password)
+        //{
+        //    using (var sha256 = SHA256.Create())
+        //    {
+        //        var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+        //        return Convert.ToBase64String(bytes);
+        //    }
+        //}
+
         private string HashPassword(string password)
         {
-            using (var sha256 = SHA256.Create())
-            {
-                var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-                return Convert.ToBase64String(bytes);
-            }
+            return password;
         }
+
 
         private void LoginForm2_KeyDown(object sender, KeyEventArgs e)
         {

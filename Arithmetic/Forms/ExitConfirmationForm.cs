@@ -9,13 +9,14 @@ namespace Arithmetic.Forms
     {
         public bool Confirmed { get; private set; } = false;
 
-        public ExitConfirmationForm()
+        public ExitConfirmationForm(string message = "Вы уверены, что хотите выйти?")
         {
-            InitializeComponent();
+            InitializeComponent(message);
             FadeInEffect();
         }
 
-      
+
+
 
         private void ExitConfirmationForm_Paint(object sender, PaintEventArgs e)
         {

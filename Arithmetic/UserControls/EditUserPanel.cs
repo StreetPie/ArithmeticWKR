@@ -1,35 +1,49 @@
 ﻿using System;
-using System.Linq;
+using System.Drawing;
 using System.Windows.Forms;
 using Arithmetic.Database;
 using Arithmetic.Models;
+using Arithmetic.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Arithmetic.UserControls
 {
     public partial class EditUserPanel : UserControl
     {
-        private readonly AppDbContext _context;
-        private readonly User _user;
+        private readonly IServiceScopeFactory _scopeFactory;
+        private User _user;
+        private readonly int _userId;
 
         public event EventHandler UserUpdated;
 
-        public EditUserPanel(AppDbContext context, User user)
+        public EditUserPanel(UserSessionService session, IServiceScopeFactory scopeFactory, int userId)
         {
-            InitializeComponent();
-            _context = context;
-            _user = user;
+            InitializeComponent();  // Инициализация компонентов
+            _scopeFactory = scopeFactory;
+            _userId = userId;
+
             LoadData();
         }
 
         private void LoadData()
         {
+            using var scope = _scopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            _user = context.Users.FirstOrDefault(u => u.Id == _userId);
+            if (_user == null)
+            {
+                MessageBox.Show("Пользователь не найден");
+                return;
+            }
+
             txtFirstName.Text = _user.FirstName;
             txtLastName.Text = _user.LastName;
             datePicker.Value = _user.DateOfBirth;
 
             if (_user.RoleId == 1)
             {
-                comboClass.DataSource = _context.Classes.ToList();
+                comboClass.DataSource = context.Classes.ToList();
                 comboClass.DisplayMember = "Name";
                 comboClass.ValueMember = "Id";
                 comboClass.SelectedValue = _user.ClassId;
@@ -45,17 +59,27 @@ namespace Arithmetic.UserControls
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-            _user.FirstName = txtFirstName.Text;
-            _user.LastName = txtLastName.Text;
-            _user.DateOfBirth = datePicker.Value;
+            using var scope = _scopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-            if (_user.RoleId == 1 && comboClass.SelectedItem is Class selectedClass)
+            var user = context.Users.FirstOrDefault(u => u.Id == _userId);
+            if (user == null)
             {
-                _user.ClassId = selectedClass.Id;
+                MessageBox.Show("Пользователь не найден");
+                return;
             }
 
-            _context.Users.Update(_user);
-            _context.SaveChanges();
+            user.FirstName = txtFirstName.Text;
+            user.LastName = txtLastName.Text;
+            user.DateOfBirth = datePicker.Value;
+
+            if (user.RoleId == 1 && comboClass.SelectedItem is Class selectedClass)
+            {
+                user.ClassId = selectedClass.Id;
+            }
+
+            context.Users.Update(user);
+            context.SaveChanges();
 
             MessageBox.Show("Изменения сохранены.");
             UserUpdated?.Invoke(this, EventArgs.Empty);

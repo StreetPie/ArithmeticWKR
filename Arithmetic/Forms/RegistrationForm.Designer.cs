@@ -75,7 +75,33 @@
             };
             buttonCalendar.FlatAppearance.BorderSize = 0;
 
+            maskedTextBoxDOB = new MaskedTextBox
+            {
+                Font = new Font("Segoe UI", 18F),
+                Location = new Point(centerX - 150, startY + 3 * spacingY),
+                Size = new Size(170, 40),
+                Mask = "00.00.0000",
+                ValidatingType = typeof(DateTime),
+                    PromptChar = '_',
+                TextAlign = HorizontalAlignment.Right,
+            };
 
+            monthCalendar = new MonthCalendar
+            {
+                MaxSelectionCount = 1,
+                Visible = false,
+                Location = new Point(centerX - 150, startY + 3 * spacingY + 50)
+            };
+            monthCalendar.DateSelected += (s, e) =>
+            {
+                maskedTextBoxDOB.Text = e.Start.ToString("dd.MM.yyyy");
+                monthCalendar.Visible = false;
+            };
+
+            buttonCalendar.Click += (s, e) =>
+            {
+                monthCalendar.Visible = !monthCalendar.Visible;
+            };
 
 
 
@@ -127,6 +153,7 @@
             Controls.Add(comboBoxClass);
             Controls.Add(buttonRegister);
             Controls.Add(buttonBack);
+
 
             this.Load += RegistrationForm_Load;
         }
